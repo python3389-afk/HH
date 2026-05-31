@@ -1,0 +1,1 @@
+- [OrderMe Expo setup](orderme-expo-setup.md) — React Navigation (not expo-router); main=./index.ts; newArchEnabled:false; logo at src/logo.png
