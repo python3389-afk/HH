@@ -111,10 +111,8 @@ const createStyles = (COLORS, SHADOWS) => StyleSheet.create({
     backgroundColor: COLORS.primary,
     borderRadius: 20, width: 52, height: 52,
     justifyContent: 'center', alignItems: 'center', marginTop: -20,
-    shadowColor: COLORS.glow,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.6,
-    shadowRadius: 12,
-    elevation: 10,
+    ...(Platform.OS === 'web'
+      ? { boxShadow: '0px 6px 12px rgba(59,130,246,0.5)' }
+      : { shadowColor: COLORS.glow, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.6, shadowRadius: 12, elevation: 10 }),
   },
 });

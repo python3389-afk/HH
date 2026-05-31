@@ -1,1 +1,3 @@
 - [OrderMe Expo setup](orderme-expo-setup.md) — React Navigation (not expo-router); main=./index.ts; newArchEnabled:false; logo at src/logo.png
+- [OrderMe Web Warning Suppression](orderme-web-warnings.md) — console.warn filter in index.ts is the only reliable way to suppress RNW warnings before StyleSheet init
+- [OrderMe Shadow Strategy](orderme-shadow-strategy.md) — platform-safe shadow utility in src/utils/shadows.js; themes.js and colors.js both use it; Platform.OS guard required

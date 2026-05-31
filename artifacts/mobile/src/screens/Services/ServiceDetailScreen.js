@@ -432,7 +432,7 @@ export default function ServiceDetailScreen({ navigation, route }) {
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      <View style={styles.heroNav} pointerEvents="box-none">
+      <View style={[styles.heroNav, { pointerEvents: 'box-none' }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.navBtn}>
           <Ionicons name="arrow-back" size={22} color="#fff" />
         </TouchableOpacity>

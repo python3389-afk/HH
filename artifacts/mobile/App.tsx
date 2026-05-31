@@ -1,7 +1,7 @@
 import 'react-native-gesture-handler';
 import './src/config/firebase';
 import React, { useEffect, useRef } from 'react';
-import { Animated, Platform, StatusBar, View } from 'react-native';
+import { Animated, LogBox, Platform, StatusBar, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from './src/context/AuthContext';
@@ -18,6 +18,17 @@ import LocationPermissionModal from './src/components/LocationPermissionModal';
 import AppNavigator from './src/navigation/AppNavigator';
 import { useFonts } from 'expo-font';
 import Ionicons from '@expo/vector-icons/Ionicons';
+
+// Suppress known web-only cosmetic warnings (safe — no effect on native)
+if (Platform.OS === 'web') {
+  LogBox.ignoreLogs([
+    '"shadow*" style props are deprecated',
+    'props.pointerEvents is deprecated',
+    '`useNativeDriver` is not supported',
+    'Animated: `useNativeDriver`',
+    'The Geocoding API has been removed',
+  ]);
+}
 
 function AppShell() {
   const { colors, statusBar, isDark } = useTheme();

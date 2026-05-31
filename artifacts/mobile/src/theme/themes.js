@@ -1,3 +1,5 @@
+import { PLATFORM_SHADOWS, PLATFORM_SHADOWS_DARK } from '../utils/shadows';
+
 /** Light (default) */
 export const LightTheme = {
   mode: 'light',
@@ -28,17 +30,14 @@ export const LightTheme = {
     gradientHeader: ['#1a56db', '#3b82f6'],
     gradientGreen: ['#059669', '#10b981'],
     gradientPurple: ['#7c3aed', '#8b5cf6'],
+    gradientOrange: ['#f59e0b', '#d97706'],
     tabBar: '#ffffff',
     inputBg: '#f8faff',
     overlay: 'rgba(0, 0, 0, 0.5)',
     glow: 'rgba(59, 130, 246, 0.35)',
+    shadow: 'rgba(26, 86, 219, 0.12)',
   },
-  shadows: {
-    sm: { shadowColor: '#1a56db', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 },
-    md: { shadowColor: '#1a56db', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 4 },
-    lg: { shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.12, shadowRadius: 16, elevation: 8 },
-    card: { shadowColor: '#1a56db', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 12, elevation: 5 },
-  },
+  shadows: PLATFORM_SHADOWS,
   statusBar: 'dark-content',
 };
 
@@ -72,16 +71,13 @@ export const DarkNeoTheme = {
     gradientHeader: ['#0f172a', '#1e3a8a'],
     gradientGreen: ['#065f46', '#059669'],
     gradientPurple: ['#4c1d95', '#7c3aed'],
+    gradientOrange: ['#92400e', '#d97706'],
     tabBar: '#0f1629',
     inputBg: '#151d32',
     overlay: 'rgba(0, 0, 0, 0.75)',
     glow: 'rgba(56, 189, 248, 0.45)',
+    shadow: 'rgba(56, 189, 248, 0.12)',
   },
-  shadows: {
-    sm: { shadowColor: '#38bdf8', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.15, shadowRadius: 6, elevation: 3 },
-    md: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 10, elevation: 6 },
-    lg: { shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.45, shadowRadius: 20, elevation: 10 },
-    card: { shadowColor: '#38bdf8', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 14, elevation: 6 },
-  },
+  shadows: PLATFORM_SHADOWS_DARK,
   statusBar: 'light-content',
 };

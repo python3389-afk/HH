@@ -1,0 +1,140 @@
+# Full Application Audit, Debugging & Enhancement Request
+
+Perform a complete code review, debugging pass, optimization, and UI/UX enhancement of the entire application.
+
+## Login & Signup Screens
+
+* Increase logo size.
+* Place logo prominently at the top.
+* Improve logo visibility and branding.
+* Make the logo responsive across mobile, tablet, and desktop.
+* Modernize login and signup UI.
+* Improve spacing, typography, and visual hierarchy.
+* Ensure forms are fully responsive.
+
+## Bookmarks & User Data
+
+* Preserve all existing user data.
+* Preserve all existing bookmarks/favorites.
+* Maintain backward compatibility with existing data structures.
+* Verify bookmark creation, editing, deletion, and retrieval functionality.
+
+## Service Error Fix
+
+* Investigate and fix the "Service not available" error.
+* Ensure bookmarked URLs open correctly.
+* Verify deep links and direct URL access.
+* Fix routing and refresh issues.
+* Add proper fallback handling and error recovery.
+
+## Routing & Navigation
+
+* Review all routes.
+* Fix broken links and redirects.
+* Verify navigation between all pages.
+* Ensure protected routes function correctly.
+* Validate route guards and authentication flows.
+
+## API & Backend Validation
+
+* Test all API endpoints.
+* Fix failed requests and response handling.
+* Add proper timeout handling.
+* Improve error messages.
+* Validate authentication and authorization flows.
+* Review backend logs for hidden failures.
+
+## Location Services
+
+* Implement proper permission requests.
+* Gracefully handle denied permissions.
+* Show user-friendly messages.
+* Add fallback behavior when location is unavailable.
+* Prevent application crashes due to location errors.
+
+## UI/UX Improvements
+
+* Improve layout consistency.
+* Improve responsiveness.
+* Enhance color palette.
+* Improve accessibility.
+* Optimize mobile experience.
+* Improve loading indicators.
+* Improve empty states and error states.
+
+## Performance Optimization
+
+* Remove unused code.
+* Remove unused assets.
+* Fix warnings and linting errors.
+* Optimize images and assets.
+* Reduce unnecessary API calls.
+* Improve rendering performance.
+* Check memory leaks.
+
+## Security Review
+
+* Review authentication flow.
+* Review token handling.
+* Validate input sanitization.
+* Prevent common vulnerabilities.
+* Secure API communication.
+
+## Testing
+
+Perform complete testing including:
+
+### Functional Testing
+
+* Login
+* Signup
+* Logout
+* Password reset
+* Bookmarks
+* Search
+* Location services
+* Navigation
+* User settings
+
+### Cross-Platform Testing
+
+* Android
+* iOS
+* Desktop browsers
+
+### Responsive Testing
+
+* Mobile
+* Tablet
+* Desktop
+
+### Error Testing
+
+* Offline mode
+* Slow network
+* API failure
+* Permission denial
+
+## Final Deliverables
+
+Provide:
+
+1. Complete updated source code.
+2. Fully working production build.
+3. ZIP file containing the complete fixed project.
+4. Detailed bug report.
+5. List of fixes applied.
+6. Remaining known issues (if any).
+7. Deployment verification report.
+8. Performance optimization report.
+9. Security review report.
+
+## Important Requirements
+
+* Do not remove existing user data.
+* Do not remove bookmarks.
+* Maintain backward compatibility.
+* Ensure successful deployment.
+* Verify all features before delivery.
+* Fix all build errors, console errors, runtime errors, and warnings.
+* Perform end-to-end testing before creating the final ZIP package.

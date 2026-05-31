@@ -1,4 +1,5 @@
-// Theme Colors - OrderMe Design System
+import { Platform } from 'react-native';
+
 export const COLORS = {
   primary: '#1a56db',
   primaryDark: '#1341b0',
@@ -64,33 +65,16 @@ export const SIZES = {
   fontHero: 32,
 };
 
+function makeShadow(color, offset, opacity, radius, elevation) {
+  if (Platform.OS === 'web') {
+    return { boxShadow: `${offset.width}px ${offset.height}px ${radius}px rgba(0,0,0,${opacity * 0.6})` };
+  }
+  return { shadowColor: color, shadowOffset: offset, shadowOpacity: opacity, shadowRadius: radius, elevation };
+}
+
 export const SHADOWS = {
-  sm: {
-    shadowColor: '#1a56db',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  md: {
-    shadowColor: '#1a56db',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  lg: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-  card: {
-    shadowColor: '#1a56db',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 5,
-  },
+  sm:   makeShadow('#1a56db', { width: 0, height: 2 },  0.08, 4,  2),
+  md:   makeShadow('#1a56db', { width: 0, height: 4 },  0.12, 8,  4),
+  lg:   makeShadow('#000000', { width: 0, height: 8 },  0.12, 16, 8),
+  card: makeShadow('#1a56db', { width: 0, height: 4 },  0.10, 12, 5),
 };
