@@ -27,6 +27,7 @@ import { resolveServiceCategory } from '../../utils/categoryMap';
 import { USE_NATIVE_DRIVER, fadeInInitial } from '../../utils/animation';
 import { getLocalizedServiceLabel } from '../../utils/serviceLabels';
 import VoiceSearchModal from '../../components/VoiceSearchModal';
+import { useLocation } from '../../context/LocationContext';
 
 const { width } = Dimensions.get('window');
 const BANNER_WIDTH = width - 48;
@@ -59,6 +60,15 @@ export default function HomeScreen({ navigation }) {
   const [bannerIndex, setBannerIndex] = useState(0);
   const bannerRef = useRef(null);
   const BANNERS = banners.length ? banners : [];
+  const { coords, cityName, permissionStatus, promptLocationIfNeeded, setShowPermissionModal } = useLocation();
+  const locationPrompted = useRef(false);
+
+  useEffect(() => {
+    if (user && !locationPrompted.current) {
+      locationPrompted.current = true;
+      promptLocationIfNeeded();
+    }
+  }, [user, promptLocationIfNeeded]);
 
   useEffect(() => {
     if (!BANNERS.length) return undefined;
@@ -229,6 +239,21 @@ export default function HomeScreen({ navigation }) {
             <View style={styles.headerLeft}>
               <Image source={{ uri: user?.avatar }} style={styles.avatar} />
               <View style={styles.headerTextWrap}>
+                <View style={styles.locationChip}>
+                  <Ionicons
+                    name={permissionStatus === 'granted' ? 'location' : 'location-outline'}
+                    size={12}
+                    color={permissionStatus === 'granted' ? colors.primary : colors.textLight}
+                  />
+                  <Text style={[styles.locationChipText, { color: permissionStatus === 'granted' ? colors.primary : colors.textLight }]} numberOfLines={1}>
+                    {permissionStatus === 'granted' && cityName ? cityName : 'Set location'}
+                  </Text>
+                  {permissionStatus !== 'granted' && (
+                    <TouchableOpacity onPress={() => setShowPermissionModal(true)}>
+                      <Text style={[styles.locationSetBtn, { color: colors.primary }]}>Enable</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
                 <Text style={styles.greeting}>{t('hello')}</Text>
                 <Text style={styles.userName} numberOfLines={1}>{user?.name}</Text>
               </View>
@@ -365,7 +390,24 @@ export default function HomeScreen({ navigation }) {
         {/* Popular Near You */}
         <AnimatedCard delay={250}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t('popularNearYou')}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.sectionTitle}>
+                {permissionStatus === 'granted' && cityName
+                  ? `Popular Near ${cityName}`
+                  : t('popularNearYou')}
+              </Text>
+              {permissionStatus === 'granted' && cityName ? (
+                <Text style={[styles.locationSubLabel, { color: colors.textLight }]}>
+                  <Ionicons name="location" size={11} color={colors.primary} /> Showing providers in your area
+                </Text>
+              ) : permissionStatus !== 'granted' ? (
+                <TouchableOpacity onPress={() => setShowPermissionModal(true)}>
+                  <Text style={[styles.locationSubLabel, { color: colors.primary }]}>
+                    <Ionicons name="location-outline" size={11} /> Enable location for better results
+                  </Text>
+                </TouchableOpacity>
+              ) : null}
+            </View>
             <TouchableOpacity onPress={() => navigation.navigate('MainTabs', { screen: 'Services' })}>
               <Text style={styles.viewAll}>{t('viewAll')}</Text>
             </TouchableOpacity>
@@ -402,6 +444,10 @@ const createStyles = (COLORS, SHADOWS) => StyleSheet.create({
   headerLeft: { flexDirection: 'row', alignItems: 'center', flex: 1, marginRight: 12 },
   headerTextWrap: { flex: 1, minWidth: 0, marginLeft: 12 },
   avatar: { width: 46, height: 46, borderRadius: 23, borderWidth: 2, borderColor: COLORS.primary },
+  locationChip: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 2 },
+  locationChipText: { fontSize: 11, fontWeight: '600', flexShrink: 1 },
+  locationSetBtn: { fontSize: 11, fontWeight: '700', marginLeft: 4 },
+  locationSubLabel: { fontSize: 11, marginTop: 2 },
   greeting: { fontSize: 13, color: COLORS.textSecondary },
   userName: { fontSize: 17, fontWeight: '800', color: COLORS.text, flexShrink: 1 },
   headerRight: { flexDirection: 'row', gap: 8 },

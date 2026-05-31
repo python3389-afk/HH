@@ -12,7 +12,9 @@ import { SearchFilterProvider } from './src/context/SearchFilterContext';
 import { NotificationsProvider } from './src/context/NotificationsContext';
 import { BookingProvider } from './src/context/BookingContext';
 import { BookmarksProvider } from './src/context/BookmarksContext';
+import { LocationProvider } from './src/context/LocationContext';
 import ErrorBoundary from './src/components/ErrorBoundary';
+import LocationPermissionModal from './src/components/LocationPermissionModal';
 import AppNavigator from './src/navigation/AppNavigator';
 import { useFonts } from 'expo-font';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -58,6 +60,7 @@ function AppShell() {
       <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
         <AppNavigator />
       </Animated.View>
+      <LocationPermissionModal />
     </View>
   );
 }
@@ -78,17 +81,19 @@ export default function App() {
           <AuthProvider>
             <ThemeProvider>
               <LanguageProvider>
-                <DataProvider>
-                  <SearchFilterProvider>
-                    <BookingProvider>
-                      <NotificationsProvider>
-                        <BookmarksProvider>
-                          <AppShell />
-                        </BookmarksProvider>
-                      </NotificationsProvider>
-                    </BookingProvider>
-                  </SearchFilterProvider>
-                </DataProvider>
+                <LocationProvider>
+                  <DataProvider>
+                    <SearchFilterProvider>
+                      <BookingProvider>
+                        <NotificationsProvider>
+                          <BookmarksProvider>
+                            <AppShell />
+                          </BookmarksProvider>
+                        </NotificationsProvider>
+                      </BookingProvider>
+                    </SearchFilterProvider>
+                  </DataProvider>
+                </LocationProvider>
               </LanguageProvider>
             </ThemeProvider>
           </AuthProvider>
