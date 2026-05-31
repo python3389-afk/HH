@@ -9,15 +9,52 @@ import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
 import { callProviderNow, messageProvider } from '../../utils/bookingNavigation';
 import { useBookmarks } from '../../context/BookmarksContext';
+import { getLocalCatalogArrays } from '../../data/localCatalog';
 
 export default function ProviderProfileScreen({ navigation, route }) {
-  const { provider } = route.params;
-  const { getServicesByProvider } = useData();
-  const { isBookmarked, toggleBookmark } = useBookmarks();
+  const { getProvider, getServicesByProvider } = useData();
+  const { isBookmarked, toggleBookmark, bookmarks } = useBookmarks();
+
+  const provider = useMemo(() => {
+    let p = route.params?.provider;
+    if (typeof p === 'string') p = null;
+    if (p && Object.keys(p).length > 0) return p;
+    if (route.params?.id) {
+      p = getProvider(route.params.id);
+      if (p) return p;
+      const local = getLocalCatalogArrays().providers;
+      p = local.find(x => String(x.id) === String(route.params.id));
+      if (p) return p;
+      const bKey = `provider_${route.params.id}`;
+      if (bookmarks && bookmarks[bKey]) return bookmarks[bKey];
+    }
+    return null;
+  }, [route.params, getProvider, bookmarks]);
+
   const { colors, shadows, isDark, statusBar } = useTheme();
   const styles = useMemo(() => createStyles(colors, shadows, isDark), [colors, shadows, isDark]);
   const bookmarked = isBookmarked('provider', provider?.id);
-  const providerServices = getServicesByProvider(provider.id);
+  const providerServices = provider?.id ? getServicesByProvider(provider.id) : [];
+
+  if (!provider) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={{ color: colors.text, fontSize: 16 }}>Provider not found</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginTop: 16, marginBottom: 20 }}>
+          <Text style={{ color: colors.primary, fontWeight: 'bold' }}>Go Back</Text>
+        </TouchableOpacity>
+        {bookmarked && (
+          <TouchableOpacity 
+            onPress={() => toggleBookmark('provider', provider || { id: route.params?.id || route.params?.provider?.id })}
+            style={{ padding: 12, backgroundColor: '#fee2e2', borderRadius: 8, flexDirection: 'row', alignItems: 'center', gap: 6 }}
+          >
+            <Ionicons name="trash-outline" size={20} color="#ef4444" />
+            <Text style={{ color: '#ef4444', fontWeight: '700' }}>Remove Bookmark</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  }
 
   const handleCall = () => callProviderNow(provider);
 
@@ -45,7 +82,7 @@ export default function ProviderProfileScreen({ navigation, route }) {
             </View>
             <View style={styles.ratingRow}>
               <Ionicons name="star" size={16} color="#f59e0b" />
-              <Text style={styles.ratingText}>{provider.rating} ({provider.reviewCount})</Text>
+              <Text style={styles.ratingText}>{provider.rating || '4.5'} ({provider.reviewCount || '20'})</Text>
             </View>
             <View style={styles.locationRow}>
               <Ionicons name="location-outline" size={14} color="rgba(255,255,255,0.8)" />
@@ -149,21 +186,10 @@ export default function ProviderProfileScreen({ navigation, route }) {
 
       {/* Bottom Actions */}
       <View style={styles.bottomBar}>
-        <TouchableOpacity style={styles.messageBtn} onPress={handleCall}>
-          <Ionicons name="call-outline" size={20} color={colors.primary} />
-          <Text style={styles.messageBtnText}>Call</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.messageBtn}
-          onPress={() => messageProvider(provider?.phone || '', 'Hello, I would like more information about your service.')}
-        >
-          <Ionicons name="chatbubble-outline" size={20} color={colors.primary} />
-          <Text style={styles.messageBtnText}>Message</Text>
-        </TouchableOpacity>
         <TouchableOpacity style={{ flex: 1 }} onPress={handleCall} activeOpacity={0.9}>
           <LinearGradient colors={[colors.primary, colors.primaryDark]} style={styles.bookBtn}>
             <Ionicons name="call" size={18} color="#fff" />
-            <Text style={styles.bookBtnText}>Call Now</Text>
+            <Text style={styles.bookBtnText}>{provider?.phones?.[0] || provider?.phone || 'Call Now'}</Text>
           </LinearGradient>
         </TouchableOpacity>
       </View>

@@ -18,6 +18,7 @@ import { useSearchFilter } from '../../context/SearchFilterContext';
 import LiveProviderCard from '../../components/LiveProviderCard';
 import { serviceSupportsBooking } from '../../data/websiteCatalog';
 import { getLocalizedServiceLabel } from '../../utils/serviceLabels';
+import { getLocalCatalogArrays } from '../../data/localCatalog';
 import {
   applyDestinationFilterToService,
   getDestinationPointsForService,
@@ -28,7 +29,25 @@ import {
 const { width } = Dimensions.get('window');
 
 export default function ServiceDetailScreen({ navigation, route }) {
-  const routeService = route.params?.service;
+  const { getProvider, getService } = useData();
+  const { isBookmarked, toggleBookmark, bookmarks } = useBookmarks();
+  
+  const routeService = useMemo(() => {
+    let s = route.params?.service;
+    if (typeof s === 'string') s = null;
+    if (s && Object.keys(s).length > 0) return s;
+    if (route.params?.id) {
+      s = getService(route.params.id);
+      if (s) return s;
+      const local = getLocalCatalogArrays().services;
+      s = local.find(x => String(x.id) === String(route.params.id));
+      if (s) return s;
+      const bKey = `service_${route.params.id}`;
+      if (bookmarks && bookmarks[bKey]) return bookmarks[bKey];
+    }
+    return null;
+  }, [route.params, getService, bookmarks]);
+
   const { destinationPoint: searchDestination, setDestination } = useSearchFilter();
   const [localDestination, setLocalDestination] = useState(null);
   const [destinationModalVisible, setDestinationModalVisible] = useState(false);
@@ -46,24 +65,23 @@ export default function ServiceDetailScreen({ navigation, route }) {
     }
     return routeService;
   }, [routeService, activeDestination]);
-  const { getProvider } = useData();
-  const { isBookmarked, toggleBookmark } = useBookmarks();
   const { colors: COLORS } = useTheme();
   const { t, language } = useLanguage();
   const styles = useMemo(() => createStyles(COLORS, SHADOWS), [COLORS]);
-  const valid = Boolean(service?.id && service?.packages?.length);
+  const valid = Boolean(service);
 
-  const [selectedPackage, setSelectedPackage] = useState(service?.packages?.[0] ?? null);
+  const defaultPackage = { id: 'inquiry', name: 'Get Quote', price: 0, originalPrice: 0, features: ['Call provider'] };
+  const [selectedPackage, setSelectedPackage] = useState(service?.packages?.[0] ?? defaultPackage);
   const [expanded, setExpanded] = useState(false);
   const bookmarked = isBookmarked('service', service?.id);
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const provider = valid ? getProvider(service.providerId) : null;
   const contactPhones = formatServicePhones(service);
-  const liveProviders = service.providers?.length ? service.providers : null;
+  const liveProviders = service?.providers?.length ? service.providers : null;
   const supportsBooking = serviceSupportsBooking(service);
   const providerPlaceholderIcon = useMemo(() => {
-    const slug = service.slug || '';
+    const slug = service?.slug || '';
     if (slug.includes('bus') || slug === 'hiace' || slug === 'scorpio' || slug === 'taxi' || slug === 'bike-ride') {
       return 'bus-outline';
     }
@@ -72,7 +90,7 @@ export default function ServiceDetailScreen({ navigation, route }) {
       return 'restaurant-outline';
     }
     return 'storefront-outline';
-  }, [service.slug]);
+  }, [service?.slug]);
   const showListPrice = supportsBooking && (selectedPackage?.price ?? 0) > 0;
   const showDestinationPicker = serviceNeedsDestinationPicker(routeService) && destinationOptions.length > 0;
   const activeDestinationLabel = destinationOptions.find((d) => d.value === activeDestination)?.value
@@ -84,17 +102,6 @@ export default function ServiceDetailScreen({ navigation, route }) {
     setDestinationModalVisible(false);
   };
 
-  if (!valid || !selectedPackage) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
-        <Text style={{ fontSize: 16, marginBottom: 16, textAlign: 'center' }}>{t('serviceNotAvailable')}</Text>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ color: '#1a56db', fontWeight: '700' }}>{t('goBack')}</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
   const handleBookmark = () => {
     Animated.sequence([
       Animated.timing(scaleAnim, { toValue: 1.3, duration: 100, useNativeDriver: true }),
@@ -102,6 +109,26 @@ export default function ServiceDetailScreen({ navigation, route }) {
     ]).start();
     toggleBookmark('service', service);
   };
+
+  if (!valid) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+        <Text style={{ fontSize: 16, marginBottom: 16, textAlign: 'center' }}>{t('serviceNotAvailable')}</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginBottom: 20 }}>
+          <Text style={{ color: '#1a56db', fontWeight: '700', fontSize: 16 }}>{t('goBack')}</Text>
+        </TouchableOpacity>
+        {bookmarked && (
+          <TouchableOpacity 
+            onPress={() => toggleBookmark('service', service || { id: route.params?.id || route.params?.service?.id })}
+            style={{ padding: 12, backgroundColor: '#fee2e2', borderRadius: 8, flexDirection: 'row', alignItems: 'center', gap: 6 }}
+          >
+            <Ionicons name="trash-outline" size={20} color="#ef4444" />
+            <Text style={{ color: '#ef4444', fontWeight: '700' }}>Remove Bookmark</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  }
 
   const handleBookNow = () => {
     navigateToBooking(navigation, { service, selectedPackage, provider });
@@ -145,8 +172,12 @@ export default function ServiceDetailScreen({ navigation, route }) {
 
         {showListPrice ? (
           <View style={styles.priceRow}>
-            <Text style={styles.price}>Rs. {selectedPackage.price.toLocaleString()}</Text>
-            <Text style={styles.originalPrice}>Rs. {selectedPackage.originalPrice.toLocaleString()}</Text>
+            {selectedPackage?.price ? (
+              <Text style={styles.price}>Rs. {selectedPackage.price.toLocaleString()}</Text>
+            ) : null}
+            {selectedPackage?.originalPrice ? (
+              <Text style={styles.originalPrice}>Rs. {selectedPackage.originalPrice.toLocaleString()}</Text>
+            ) : null}
             <View style={styles.ratingPill}>
               <Ionicons name="star" size={12} color="#f59e0b" />
               <Text style={styles.ratingText}>{service.rating} ({service.reviewCount})</Text>
@@ -157,15 +188,6 @@ export default function ServiceDetailScreen({ navigation, route }) {
             <View style={styles.ratingPill}>
               <Ionicons name="star" size={12} color="#f59e0b" />
               <Text style={styles.ratingText}>{service.rating} ({service.reviewCount})</Text>
-            </View>
-          </View>
-        )}
-
-        {service.providerCount > 0 && (
-          <View style={styles.metaRow}>
-            <View style={styles.metaPill}>
-              <Ionicons name="people-outline" size={14} color={COLORS.primary} />
-              <Text style={styles.metaPillText}>{service.providerCount} providers on OrderMe</Text>
             </View>
           </View>
         )}
@@ -193,14 +215,14 @@ export default function ServiceDetailScreen({ navigation, route }) {
           style={styles.packagesScroll}
           contentContainerStyle={{ gap: 10, paddingHorizontal: 20 }}
         >
-          {service.packages.map(pkg => (
+          {service.packages && service.packages.map(pkg => (
             <TouchableOpacity
               key={pkg.id}
-              style={[styles.pkgCard, selectedPackage.id === pkg.id && styles.pkgCardActive]}
+              style={[styles.pkgCard, selectedPackage?.id === pkg.id && styles.pkgCardActive]}
               onPress={() => setSelectedPackage(pkg)}
               activeOpacity={0.85}
             >
-              {selectedPackage.id === pkg.id ? (
+              {selectedPackage?.id === pkg.id ? (
                 <LinearGradient colors={[COLORS.text, '#374151']} style={styles.pkgGrad}>
                   <Text style={[styles.pkgName, { color: '#fff' }]}>{pkg.name}</Text>
                   <Text style={[styles.pkgPrice, { color: '#fff' }]}>Rs. {pkg.price.toLocaleString()}</Text>
@@ -284,12 +306,17 @@ export default function ServiceDetailScreen({ navigation, route }) {
                 key={providerStableKey(p, i)}
                 provider={p}
                 placeholderIcon={providerPlaceholderIcon}
-                onMessage={() =>
-                  messageProvider(
-                    p.phone || p.contactPhone || '',
-                    `Hi, I'm interested in ${service?.title || 'your service'}.`,
-                  )
-                }
+                onCall={() => {
+                  const phone = p.phone || p.contactPhone || '';
+                  if (phone) {
+                    const digits = phone.replace(/\D/g, '');
+                    if (digits) {
+                      import('react-native').then(({ Linking }) => {
+                        Linking.openURL(`tel:${digits}`);
+                      });
+                    }
+                  }
+                }}
               />
             ))}
             {liveProviders.length > 8 && !expanded ? (
@@ -339,7 +366,7 @@ export default function ServiceDetailScreen({ navigation, route }) {
 
         {/* Package Features */}
         <View style={styles.featuresBox}>
-          {selectedPackage.features?.map((f, i) => (
+          {selectedPackage?.features?.map((f, i) => (
             <View key={i} style={styles.featureRow}>
               <View style={styles.featureCheck}>
                 <Ionicons name="checkmark" size={12} color={COLORS.primary} />
@@ -447,7 +474,7 @@ export default function ServiceDetailScreen({ navigation, route }) {
         {showListPrice ? (
           <View style={styles.bottomPrice}>
             <Text style={styles.bottomPriceLabel}>{t('totalPrice')}</Text>
-            <Text style={styles.bottomPriceValue}>Rs. {selectedPackage.price.toLocaleString()}</Text>
+            {selectedPackage?.price ? <Text style={styles.bottomPriceValue}>Rs. {selectedPackage.price.toLocaleString()}</Text> : null}
           </View>
         ) : null}
         <TouchableOpacity
